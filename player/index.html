@@ -41,6 +41,7 @@
     <select id="character" aria-label="Character">
       <option value="maya">Maya</option>
       <option value="mark">Mark</option>
+      <option value="rexy">Rexy</option>
     </select>
   </div>
   <div id="portrait"></div>
@@ -62,6 +63,8 @@
             line: "Kumusta ka? Ako si Maya. Hello! I'm Maya, and I'll help you practise Filipino." },
     mark: { name: "Mark", voice: /male|david|guy|mark|daniel/i,
             line: "Magandang araw! Ako si Mark. Good day! I'm Mark. Let's learn some Filipino together." },
+    rexy: { name: "Rexy", voice: /male|david|guy|mark|daniel/i, pitch: 1.6, rate: 1.05,
+            line: "Rawr! Ako si Rexy! Hi, I'm Rexy, and learning Filipino is dino-mite!" },
   };
   const container = document.getElementById("portrait");
   const select = document.getElementById("voice");
@@ -82,7 +85,8 @@
   function listVoices() {
     const voices = speechSynthesis.getVoices();
     const female = /female|zira|aria|jenny|samantha/i;
-    const preferred = (v) => (/^fil|^tl/i.test(v.lang) ? 0 : /^en/i.test(v.lang) && current.voice.test(v.name) && !(current === CHARACTERS.mark && female.test(v.name)) ? 1 : 2);
+    const wantsMale = current.voice.source.startsWith("male");
+    const preferred = (v) => (/^fil|^tl/i.test(v.lang) ? 0 : /^en/i.test(v.lang) && current.voice.test(v.name) && !(wantsMale && female.test(v.name)) ? 1 : 2);
     voices.sort((a, b) => preferred(a) - preferred(b));
     select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join("");
     select.voices = voices;
@@ -92,7 +96,8 @@
 
   document.getElementById("speak").onclick = () => {
     const voice = select.voices?.[select.value];
-    portrait.say(document.getElementById("text").value, { voice, lang: voice?.lang });
+    portrait.say(document.getElementById("text").value,
+                 { voice, lang: voice?.lang, pitch: current.pitch ?? 1, rate: current.rate ?? 1 });
   };
   document.getElementById("stop").onclick = () => portrait.stop();
 </script>

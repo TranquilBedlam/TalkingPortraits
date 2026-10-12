@@ -79,11 +79,12 @@ export class TalkingPortrait {
   }
 
   // Approximate lip-sync from the text while the browser's own voice speaks it.
-  say(text, { lang = "en-US", voice = null, rate = 1 } = {}) {
+  say(text, { lang = "en-US", voice = null, rate = 1, pitch = 1 } = {}) {
     this.stop();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;
+    u.pitch = pitch;
     if (voice) u.voice = voice;
     const msPerLetter = 75 / rate;
     let letters = [];

@@ -31,9 +31,16 @@ for name, boxes in regions.items():
     mask = Image.new("L", (SIZE, SIZE), 0)
     for box in boxes:
         ImageDraw.Draw(mask).ellipse(box, fill=255)
+    # Outline first, then the checker on top, so overlapping areas show one combined outline.
     img = base.copy()
-    img.paste(checker, (0, 0), mask)
     draw = ImageDraw.Draw(img)
     for box in boxes:
-        draw.ellipse(box, outline=(0, 200, 120, 255), width=3)
-    img.crop((250, 180, 774, 700)).convert("RGB").save(os.path.join(folder, f"example_erase_{name}.png"))
+        draw.ellipse([box[0] - 3, box[1] - 3, box[2] + 3, box[3] + 3], outline=(0, 200, 120, 255), width=4)
+    img.paste(checker, (0, 0), mask)
+    # Show the face around all the areas, with some margin for context.
+    every = [b for bs in regions.values() for b in bs]
+    left = max(0, min(b[0] for b in every) - 100)
+    top = max(0, min(b[1] for b in every) - 100)
+    right = min(SIZE, max(b[2] for b in every) + 100)
+    bottom = min(SIZE, max(b[3] for b in every) + 100)
+    img.crop((left, top, right, bottom)).convert("RGB").save(os.path.join(folder, f"example_erase_{name}.png"))
