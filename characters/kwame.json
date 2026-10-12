@@ -1,0 +1,20 @@
+{
+  "id": "kwame",
+  "name": "Kwame",
+  "sex": "male",
+  "age": 34,
+  "ethnicity": {"african": 1.0, "asian": 0.0, "european": 0.0},
+  "height": 0.65,
+  "build": 0.55,
+  "skin_tone": "#6B4429",
+  "hair": {"style": "short_cropped", "colour": "#141110"},
+  "eyes": {"colour": "#2A1C14"},
+  "clothes": [
+    {"type": "button_shirt", "colour": "#3E7C59"},
+    {"type": "chinos", "colour": "#C8B48A"},
+    {"type": "shoes", "colour": "#4A3020"}
+  ],
+  "accessories": [],
+  "personality": "friendly teacher, calm, encouraging",
+  "stylise": {"head_scale": 1.15, "eye_scale": 1.2, "toon_shading": true}
+}

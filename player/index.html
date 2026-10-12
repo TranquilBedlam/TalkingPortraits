@@ -1,0 +1,71 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talking Portrait</title>
+<style>
+  :root { --bg: #f6f3ee; --panel: #ffffff; --text: #2b2420; --muted: #7a6f68; --accent: #c0563f; --border: #e4ddd4; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1d1a18; --panel: #2a2623; --text: #f1ebe5; --muted: #a89d95; --accent: #e07a5f; --border: #3d3733; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, sans-serif; }
+  main { max-width: 520px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.2rem; margin: 4px 0 12px; }
+
+  .tp { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 16px; background: #fff; }
+  .tp-stage { position: absolute; inset: 0; animation: breathe 5s ease-in-out infinite; transform-origin: 50% 80%; }
+  .tp-talking .tp-stage { animation: breathe 5s ease-in-out infinite, nod 1.6s ease-in-out infinite; }
+  .tp img { position: absolute; user-select: none; pointer-events: none; transition: opacity 40ms; }
+  @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.008) translateY(-0.3%); } }
+  @keyframes nod { 0%, 100% { rotate: 0deg; } 30% { rotate: 0.6deg; } 70% { rotate: -0.5deg; } }
+
+  .controls { margin-top: 12px; display: grid; gap: 8px; }
+  textarea, select, button { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+  textarea { width: 100%; min-height: 70px; resize: vertical; }
+  .row { display: flex; gap: 8px; }
+  .row select { flex: 1; min-width: 0; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .hint { color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Maya</h1>
+  <div id="portrait"></div>
+  <div class="controls">
+    <textarea id="text">Kumusta ka? Ako si Maya. Hello! I'm Maya, and I'll help you practise Filipino.</textarea>
+    <div class="row">
+      <select id="voice" aria-label="Voice"></select>
+      <button class="primary" id="speak">Speak</button>
+      <button id="stop">Stop</button>
+    </div>
+    <p class="hint">Uses your browser's built-in voices. The lip-sync here is approximate; the language app can drive it exactly from a text-to-speech service's mouth-shape timings.</p>
+  </div>
+</main>
+<script type="module">
+  import { TalkingPortrait } from "./talking-portrait.js";
+
+  const portrait = await TalkingPortrait.create(document.getElementById("portrait"), "characters/maya");
+  const select = document.getElementById("voice");
+
+  function listVoices() {
+    const voices = speechSynthesis.getVoices();
+    const preferred = (v) => (/^fil|^tl/i.test(v.lang) ? 0 : /^en/i.test(v.lang) && /female|zira|aria|jenny|samantha/i.test(v.name) ? 1 : 2);
+    voices.sort((a, b) => preferred(a) - preferred(b));
+    select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join("");
+    select.voices = voices;
+  }
+  listVoices();
+  speechSynthesis.onvoiceschanged = listVoices;
+
+  document.getElementById("speak").onclick = () => {
+    const voice = select.voices?.[select.value];
+    portrait.say(document.getElementById("text").value, { voice, lang: voice?.lang });
+  };
+  document.getElementById("stop").onclick = () => portrait.stop();
+</script>
+</body>
+</html>

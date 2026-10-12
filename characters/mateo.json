@@ -1,0 +1,20 @@
+{
+  "id": "mateo",
+  "name": "Mateo",
+  "sex": "male",
+  "age": 26,
+  "ethnicity": {"african": 0.15, "asian": 0.25, "european": 0.6},
+  "height": 0.55,
+  "build": 0.45,
+  "skin_tone": "#C6936A",
+  "hair": {"style": "short_wavy", "colour": "#2B1D14"},
+  "eyes": {"colour": "#3A2616"},
+  "clothes": [
+    {"type": "hoodie", "colour": "#2F6FA8"},
+    {"type": "jeans", "colour": "#2A2E38"},
+    {"type": "sneakers", "colour": "#E04E39"}
+  ],
+  "accessories": [],
+  "personality": "energetic friend, jokes, big gestures",
+  "stylise": {"head_scale": 1.15, "eye_scale": 1.2, "toon_shading": true}
+}

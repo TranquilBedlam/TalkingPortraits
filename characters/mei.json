@@ -1,0 +1,21 @@
+{
+  "id": "mei",
+  "name": "Mei",
+  "sex": "female",
+  "age": 24,
+  "ethnicity": {"african": 0.0, "asian": 1.0, "european": 0.0},
+  "height": 0.4,
+  "build": 0.35,
+  "skin_tone": "#E8C4A0",
+  "hair": {"style": "shoulder_length_straight", "colour": "#1E1A18"},
+  "eyes": {"colour": "#3B2A20"},
+  "clothes": [
+    {"type": "cardigan", "colour": "#F2C14E"},
+    {"type": "t_shirt", "colour": "#FFFFFF"},
+    {"type": "jeans", "colour": "#3A5A8C"},
+    {"type": "sneakers", "colour": "#FFFFFF"}
+  ],
+  "accessories": [],
+  "personality": "cheerful student, curious, quick smile",
+  "stylise": {"head_scale": 1.15, "eye_scale": 1.2, "toon_shading": true}
+}

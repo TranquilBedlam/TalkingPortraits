@@ -1,0 +1,20 @@
+{
+  "id": "priya",
+  "name": "Priya",
+  "sex": "female",
+  "age": 42,
+  "ethnicity": {"african": 0.1, "asian": 0.5, "european": 0.4},
+  "height": 0.45,
+  "build": 0.5,
+  "skin_tone": "#B07A52",
+  "hair": {"style": "long_braid", "colour": "#1A1412"},
+  "eyes": {"colour": "#2E1E14"},
+  "clothes": [
+    {"type": "tunic", "colour": "#B23A48"},
+    {"type": "trousers", "colour": "#2E2E3A"},
+    {"type": "flats", "colour": "#5A3A2A"}
+  ],
+  "accessories": ["glasses"],
+  "personality": "warm shopkeeper, patient, expressive hands",
+  "stylise": {"head_scale": 1.15, "eye_scale": 1.2, "toon_shading": true}
+}

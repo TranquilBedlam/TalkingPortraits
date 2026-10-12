@@ -1,0 +1,6 @@
+exports/
+previews/
+*.blend1
+__pycache__/
+dist/
+*_diff.png
