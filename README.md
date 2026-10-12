@@ -6,7 +6,7 @@ Pixar-style talking characters for a language-learning app (web and phones). Eac
 1. In Midjourney, make a front-facing head-and-chest portrait with a closed-mouth smile. Save it as `portraits/<id>/base.png`.
 2. Write `portraits/<id>/regions.json` (mouth and eye ellipses on the 1024 picture) and run
    `python scripts/draw_erase_examples.py <id>` to draw the areas to erase.
-3. In Midjourney's Editor, starting from `base.png` every time, erase one area and repaint it. Save as:
+3. In Midjourney, use **Edit > upload image** with `base.png` for every edit (editing the picture from the Create page can drift), erase one area and repaint it. Save as:
    `mouth_half.png`, `mouth_oh.png`, `mouth_ah.png` (mouth area) and `eyes_closed.png` (eye areas).
 4. Check each one: `python scripts/check_portrait.py portraits/<id> mouth_half.png`
 5. Cut the layers: `python scripts/prepare_portrait.py <id>` writes `player/characters/<id>/`.

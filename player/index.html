@@ -29,14 +29,23 @@
   button { cursor: pointer; }
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   .hint { color: var(--muted); font-size: 0.85rem; }
+  .title-row { align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .title-row h1 { margin: 0; }
+  .title-row select { flex: none; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Maya</h1>
+  <div class="row title-row">
+    <h1 id="name">Maya</h1>
+    <select id="character" aria-label="Character">
+      <option value="maya">Maya</option>
+      <option value="mark">Mark</option>
+    </select>
+  </div>
   <div id="portrait"></div>
   <div class="controls">
-    <textarea id="text">Kumusta ka? Ako si Maya. Hello! I'm Maya, and I'll help you practise Filipino.</textarea>
+    <textarea id="text"></textarea>
     <div class="row">
       <select id="voice" aria-label="Voice"></select>
       <button class="primary" id="speak">Speak</button>
@@ -48,18 +57,38 @@
 <script type="module">
   import { TalkingPortrait } from "./talking-portrait.js";
 
-  const portrait = await TalkingPortrait.create(document.getElementById("portrait"), "characters/maya");
+  const CHARACTERS = {
+    maya: { name: "Maya", voice: /female|zira|aria|jenny|samantha/i,
+            line: "Kumusta ka? Ako si Maya. Hello! I'm Maya, and I'll help you practise Filipino." },
+    mark: { name: "Mark", voice: /male|david|guy|mark|daniel/i,
+            line: "Magandang araw! Ako si Mark. Good day! I'm Mark. Let's learn some Filipino together." },
+  };
+  const container = document.getElementById("portrait");
   const select = document.getElementById("voice");
+  const picker = document.getElementById("character");
+  let portrait = null;
+  let current = CHARACTERS.maya;
+
+  async function show(id) {
+    if (portrait) portrait.destroy();
+    current = CHARACTERS[id];
+    document.getElementById("name").textContent = current.name;
+    document.getElementById("text").value = current.line;
+    portrait = await TalkingPortrait.create(container, `characters/${id}`);
+    listVoices();
+  }
+  picker.onchange = () => show(picker.value);
 
   function listVoices() {
     const voices = speechSynthesis.getVoices();
-    const preferred = (v) => (/^fil|^tl/i.test(v.lang) ? 0 : /^en/i.test(v.lang) && /female|zira|aria|jenny|samantha/i.test(v.name) ? 1 : 2);
+    const female = /female|zira|aria|jenny|samantha/i;
+    const preferred = (v) => (/^fil|^tl/i.test(v.lang) ? 0 : /^en/i.test(v.lang) && current.voice.test(v.name) && !(current === CHARACTERS.mark && female.test(v.name)) ? 1 : 2);
     voices.sort((a, b) => preferred(a) - preferred(b));
     select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join("");
     select.voices = voices;
   }
-  listVoices();
   speechSynthesis.onvoiceschanged = listVoices;
+  await show("maya");
 
   document.getElementById("speak").onclick = () => {
     const voice = select.voices?.[select.value];

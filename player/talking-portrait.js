@@ -64,7 +64,7 @@ export class TalkingPortrait {
   }
 
   scheduleBlink() {
-    setTimeout(() => {
+    this.blinkTimer = setTimeout(() => {
       this.blink();
       if (Math.random() < 0.2) setTimeout(() => this.blink(), 250); // the odd double blink
       this.scheduleBlink();
@@ -113,6 +113,14 @@ export class TalkingPortrait {
     };
     this.ticker = () => clearInterval(tick);
     speechSynthesis.speak(u);
+  }
+
+  // Remove the portrait from the page (e.g. before showing another character).
+  destroy() {
+    this.stop();
+    clearTimeout(this.blinkTimer);
+    this.stage.remove();
+    this.container.classList.remove("tp", "tp-talking");
   }
 
   stop() {
