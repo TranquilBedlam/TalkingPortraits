@@ -6,11 +6,43 @@
 //   p.say("Kumusta ka?", { lang: "fil-PH" });   // speaks with lip-sync
 //   p.playVisemes([{ t: 0, shape: "ah" }, ...]); // timings from a TTS service
 
-const MOUTH_FOR_LETTER = {
-  a: "ah", e: "half", i: "half", o: "oh", u: "oh", y: "half",
-  m: "closed", b: "closed", p: "closed",
-  w: "oh", r: "half", l: "half", f: "half", v: "half",
+// Mouth shape for the main vowel of a syllable.
+const MOUTH_FOR_VOWEL = { a: "ah", e: "half", i: "half", o: "oh", u: "oh", y: "half" };
+
+// A letter on its own is read out by name ("ay", "bee", "double-u"):
+// the mouth shapes of saying that name.
+const LETTER_NAME = {
+  a: ["ah", "half"], b: ["closed", "half"], c: ["half", "half"], d: ["half", "half"],
+  e: ["half", "half"], f: ["half", "closed"], g: ["half", "half"], h: ["ah", "half"],
+  i: ["ah", "half"], j: ["half", "ah"], k: ["half", "ah"], l: ["half", "half"],
+  m: ["half", "closed"], n: ["half", "half"], o: ["oh", "oh"], p: ["closed", "half"],
+  q: ["half", "oh"], r: ["ah", "ah"], s: ["half", "half"], t: ["half", "half"],
+  u: ["half", "oh"], v: ["half", "half"], w: ["half", "oh", "half", "oh"], x: ["half", "half"],
+  y: ["ah", "half"], z: ["half", "half"],
 };
+
+const SYLLABLE_MS = 190; // one syllable at normal speed
+
+// Split a word into mouth movements: one open shape per syllable, closing
+// briefly for m/b/p, with a short in-between shape so it never snaps shut.
+function cuesForWord(word, rate) {
+  const ms = SYLLABLE_MS / rate;
+  const w = word.toLowerCase().replace(/[^a-z']/g, "");
+  if (!w) return [];
+  if (w.length === 1) {
+    // Shorter than the letter takes to say, so the mouth closes between letters.
+    return (LETTER_NAME[w] ?? ["half"]).map((shape) => ({ shape, ms: ms * 0.55 }));
+  }
+  const syllables = w.match(/[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$)?/g) || [w];
+  const cues = [];
+  for (const s of syllables) {
+    if (/^[mbp]/.test(s)) cues.push({ shape: "closed", ms: ms * 0.25 });
+    const vowel = s.match(/[aeiouy]/)?.[0];
+    cues.push({ shape: MOUTH_FOR_VOWEL[vowel] ?? "half", ms: ms * 0.6 });
+    cues.push({ shape: "half", ms: ms * 0.25 });
+  }
+  return cues;
+}
 
 export class TalkingPortrait {
   static async create(container, folder) {
@@ -86,33 +118,31 @@ export class TalkingPortrait {
     u.rate = rate;
     u.pitch = pitch;
     if (voice) u.voice = voice;
-    const msPerLetter = 75 / rate;
-    let letters = [];
-    let tick = null;
-    const run = () => {
-      tick = setInterval(() => {
-        const ch = letters.shift();
-        if (ch === undefined) return this.setMouth("closed");
-        this.setMouth(MOUTH_FOR_LETTER[ch] ?? (/[a-z]/.test(ch) ? "half" : "closed"));
-      }, msPerLetter);
+    let timer = null;
+    const play = (cues) => {
+      clearTimeout(timer);
+      const next = () => {
+        const cue = cues.shift();
+        if (!cue) return this.setMouth("closed"); // between words
+        this.setMouth(cue.shape);
+        timer = setTimeout(next, cue.ms);
+      };
+      next();
     };
-    // Each word boundary re-syncs the mouth with where the voice actually is.
+    // Each word boundary starts that word's mouth movements, so the mouth
+    // follows where the voice actually is.
     u.onboundary = (e) => {
       if (e.name && e.name !== "word") return;
-      const word = text.slice(e.charIndex).match(/^[^\s]+/);
-      letters = word ? [...word[0].toLowerCase()] : [];
+      const word = text.slice(e.charIndex).match(/^\S+/);
+      if (word) play(cuesForWord(word[0], rate));
     };
-    u.onstart = () => {
-      letters = [...text.toLowerCase()];
-      run();
-      this.container.classList.add("tp-talking");
-    };
+    u.onstart = () => this.container.classList.add("tp-talking");
     u.onend = u.onerror = () => {
-      clearInterval(tick);
+      clearTimeout(timer);
       this.setMouth("closed");
       this.container.classList.remove("tp-talking");
     };
-    this.ticker = () => clearInterval(tick);
+    this.ticker = () => clearTimeout(timer);
     speechSynthesis.speak(u);
   }
 
